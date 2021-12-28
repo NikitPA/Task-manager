@@ -131,7 +131,7 @@ public class TaskManager {
     public boolean setStatusDoneEpic(Epic epic) {
         List<SubTask> allSubTask = new ArrayList<>();
         for (int i = 0; i < allTypeTask.size(); i++) {
-            if (allTypeTask.get(i).getClass() == new SubTask("", "", 0, 0).getClass())
+            if (allTypeTask.get(i) instanceof SubTask)
                 allSubTask.add((SubTask) allTypeTask.get(i));
         }
         for (SubTask subTask : allSubTask) {
@@ -147,7 +147,7 @@ public class TaskManager {
     public boolean setStatusNewEpic(Epic epic) {
         List<SubTask> allSubTask = new ArrayList<>();
         for (int i = 0; i < allTypeTask.size(); i++) {
-            if (allTypeTask.get(i).getClass() == new SubTask("", "", 0, 0).getClass())
+            if (allTypeTask.get(i) instanceof SubTask)
                 allSubTask.add((SubTask) allTypeTask.get(i));
         }
         for (SubTask subTask : allSubTask) {
