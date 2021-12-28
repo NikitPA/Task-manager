@@ -21,15 +21,10 @@ public class TaskManager {
         return allTask;
     }
 
-    //В случае с обычными задачами мы можем применить instanceof , а вот в случае с подзадачи и эпиками уже нет, я верно
-    //понимаю? И поэтому вопрос, когда мы ищем класс через метод getClass() , нам лучше создать пустой public
-    // конструктор и вызывать его(но тогда будет проблема в том, что смогут в главном методе случайно создать пустой
-    // объект) или делать как я сделал , создавать объект с пустыми полями?
-
     public List<Task> getAllEpic() {
         List<Task> allEpic = new ArrayList<>();
         for (int i = 0; i < allTypeTask.size(); i++) {
-            if (allTypeTask.get(i).getClass() == new Epic("", "", 0).getClass()) {
+            if (allTypeTask.get(i) instanceof Epic) {
                 allEpic.add(allTypeTask.get(i));
             }
         }
@@ -40,7 +35,7 @@ public class TaskManager {
         List<Task> allSubTaskOfEpic = new ArrayList<>();
         List<SubTask> allSubTask = new ArrayList<>();
         for (int i = 0; i < allTypeTask.size(); i++) {
-            if (allTypeTask.get(i).getClass() == new SubTask("", "", 0, 0).getClass())
+            if (allTypeTask.get(i) instanceof SubTask)
                 allSubTask.add((SubTask) allTypeTask.get(i));
         }
         for (SubTask subTask : allSubTask) {
@@ -92,6 +87,22 @@ public class TaskManager {
             allTypeTask.remove(task);
         } else {
             System.out.println("Для удаления SubTask другой метод");
+        }
+        if (task instanceof Epic) {
+            removeAllSubtaskOfDeletedEpic((Epic) task);
+        } else {
+            return;
+        }
+    }
+
+    public void removeAllSubtaskOfDeletedEpic(Epic epic) {
+        for (int i = 0; i < allTypeTask.size(); i++) {
+            if (allTypeTask.get(i) instanceof SubTask) {
+                if (((SubTask) allTypeTask.get(i)).getIdEpic() == epic.getId()) {
+                    allTypeTask.remove(allTypeTask.get(i));
+                    i--;
+                }
+            }
         }
     }
 
