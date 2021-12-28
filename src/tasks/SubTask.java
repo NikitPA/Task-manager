@@ -1,17 +1,21 @@
-package Manager;
+package tasks;
 
-public class Epic extends Task {
+public class SubTask extends Task {
 
-    public Epic(String title, String description, long id) {
+    private long idEpic;
+
+    public SubTask(String title, String description, long idEpic, long id) {
         super(title, description, id);
+        this.idEpic = idEpic;
     }
 
-    protected Epic() {
+    public long getIdEpic() {
+        return idEpic;
     }
 
     @Override
     public String toString() {
-        return "Epic{" +
+        return "SubTask{" +
                 "title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", id=" + getId() +

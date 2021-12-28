@@ -1,4 +1,6 @@
-package Manager;
+package tasks;
+
+import java.util.Objects;
 
 public class Task {
     private String title;
@@ -12,8 +14,6 @@ public class Task {
         this.id = id;
     }
 
-    Task() {
-    }
 
     public String getTitle() {
         return title;
@@ -31,16 +31,8 @@ public class Task {
         return status;
     }
 
-    public void setStatusProgress() {
-        this.status = "IN_PROGRESS";
-    }
-
-    public void setStatusDone() {
-        this.status = "DONE";
-    }
-
-    public void setStatusNew() {
-        this.status = "NEW";
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
@@ -51,5 +43,18 @@ public class Task {
                 ", id=" + id +
                 ", status='" + status + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return Objects.equals(status, task.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(status);
     }
 }
