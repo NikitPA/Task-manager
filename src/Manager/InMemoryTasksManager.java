@@ -5,8 +5,36 @@ import tasks.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskManager {
+public class InMemoryTasksManager implements TaskManager {
     private List<Task> allTypeTask = new ArrayList<>();
+    private List<Task> seenTask = new ArrayList<>();
+
+    public List<Task> history() {
+        return seenTask;
+    }
+
+
+    public Task getTaskById(long id) {
+        Task taskById;
+        for (int i = 0; i < allTypeTask.size(); i++) {
+            if (allTypeTask.get(i).getId() == id) {
+                taskById = allTypeTask.get(i);
+                if (seenTask.size() < 11) {
+                    seenTask.add(taskById);
+                } else {
+                    seenTask.remove(0);
+                    seenTask.add(taskById);
+                }
+                seenTask.add(taskById);
+                return taskById;
+            }
+        }
+        return null;
+    }
+    //В ТЗ 2 спринта было сказано "Получение задачи любого типа по идентификатору.". А в этом спринте уже указано о
+    //методах getEpic и getSubTack, то есть любой тип задачи нам не нужен, а нужен уже конкретный. Поэтому и вопрос,
+    //как сделать оставлять заполнение листа seenTask в одном методе или создавать три отдельных
+    // (getEpic, getSubTack, getTask)?
 
     public List<Task> getAllTypeTask() {
         return allTypeTask;
@@ -18,6 +46,7 @@ public class TaskManager {
             if (!(allTypeTask.get(i) instanceof Epic) && !(allTypeTask.get(i) instanceof SubTask))
                 allTask.add(allTypeTask.get(i));
         }
+
         return allTask;
     }
 
@@ -59,16 +88,6 @@ public class TaskManager {
         epicSubtasks.setSubTasks(subTask);
     }
 
-    public Task getTaskById(long id) {
-        Task taskById;
-        for (int i = 0; i < allTypeTask.size(); i++) {
-            if (allTypeTask.get(i).getId() == id) {
-                taskById = allTypeTask.get(i);
-                return taskById;
-            }
-        }
-        return null;
-    }
 
     public boolean updateTaskOrEpic(Task updateTask, long id) {
         Task task = getTaskById(id);
@@ -135,12 +154,12 @@ public class TaskManager {
                 allSubTask.add((SubTask) allTypeTask.get(i));
         }
         for (SubTask subTask : allSubTask) {
-            if (subTask.getStatus().equals("DONE")) {
+            if (subTask.getStatus().equals(Status.DONE)) {
             } else {
                 return false;
             }
         }
-        epic.setStatus("DONE");
+        epic.setStatus(Status.DONE);
         return true;
     }
 
@@ -151,18 +170,18 @@ public class TaskManager {
                 allSubTask.add((SubTask) allTypeTask.get(i));
         }
         for (SubTask subTask : allSubTask) {
-            if (subTask.getStatus().equals("NEW")) {
+            if (subTask.getStatus().equals(Status.NEW)) {
             } else {
                 return false;
             }
         }
-        epic.setStatus("NEW");
+        epic.setStatus(Status.NEW);
         return true;
     }
 
     public boolean setStatusProgressEpic(Epic epic) {
         if (!setStatusDoneEpic(epic) && !setStatusNewEpic(epic)) {
-            epic.setStatus("IN_PROGRESS");
+            epic.setStatus(Status.PROGRESS);
             return true;
         }
         return false;
