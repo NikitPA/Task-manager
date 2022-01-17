@@ -18,7 +18,7 @@ public interface TaskManager {
 
     List<Task> getAllSubTaskOfEpic(long idEpic);
 
-    Task getTaskById(long id);
+    void getTaskById(long id);
 
     void addTaskOrEpic(Task task);
 

@@ -13,28 +13,27 @@ public class InMemoryTasksManager implements TaskManager {
         return seenTask;
     }
 
+    public void getTaskById(long id) {
+        Task taskById = findTaskById(id);
+        if (seenTask.size() < 10) {
+            seenTask.add(taskById);
+        } else {
+            seenTask.remove(0);
+            seenTask.add(taskById);
+        }
+    }
 
-    public Task getTaskById(long id) {
+    private Task findTaskById(long id) {
         Task taskById;
         for (int i = 0; i < allTypeTask.size(); i++) {
             if (allTypeTask.get(i).getId() == id) {
                 taskById = allTypeTask.get(i);
-                if (seenTask.size() < 11) {
-                    seenTask.add(taskById);
-                } else {
-                    seenTask.remove(0);
-                    seenTask.add(taskById);
-                }
-                seenTask.add(taskById);
                 return taskById;
             }
         }
         return null;
     }
-    //В ТЗ 2 спринта было сказано "Получение задачи любого типа по идентификатору.". А в этом спринте уже указано о
-    //методах getEpic и getSubTack, то есть любой тип задачи нам не нужен, а нужен уже конкретный. Поэтому и вопрос,
-    //как сделать оставлять заполнение листа seenTask в одном методе или создавать три отдельных
-    // (getEpic, getSubTack, getTask)?
+
 
     public List<Task> getAllTypeTask() {
         return allTypeTask;
@@ -90,7 +89,7 @@ public class InMemoryTasksManager implements TaskManager {
 
 
     public boolean updateTaskOrEpic(Task updateTask, long id) {
-        Task task = getTaskById(id);
+        Task task = findTaskById(id);
         if (task == null)
             return false;
         removeTaskOrEpic(id);
@@ -99,7 +98,7 @@ public class InMemoryTasksManager implements TaskManager {
     }
 
     public void removeTaskOrEpic(long idRemoveTask) {
-        Task task = getTaskById(idRemoveTask);
+        Task task = findTaskById(idRemoveTask);
         if (task == null)
             return;
         if (!(task instanceof SubTask)) {
@@ -126,7 +125,7 @@ public class InMemoryTasksManager implements TaskManager {
     }
 
     public boolean updateSubtask(Task updateTask, long id, Epic epicSubtask) {
-        Task subtask = getTaskById(id);
+        Task subtask = findTaskById(id);
         if (subtask == null)
             return false;
         removeSubtask(id, epicSubtask);
@@ -135,7 +134,7 @@ public class InMemoryTasksManager implements TaskManager {
     }
 
     public void removeSubtask(long idRemoveSubtask, Epic epicSubtask) {
-        Task subtask = getTaskById(idRemoveSubtask);
+        Task subtask = findTaskById(idRemoveSubtask);
         if (subtask == null)
             return;
         allTypeTask.remove(subtask);
