@@ -10,7 +10,6 @@ import java.util.Map;
 public class InMemoryHistoryManager implements HistoryManager {
     private Node head;
     private Node tail;
-    private int size;
     private Map<Long, Node> map = new HashMap<>();
 
     class Node {
@@ -33,7 +32,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             head = newNode;
         else
             l.next = newNode;
-
         return newNode;
     }
 
@@ -48,7 +46,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     private void removeNode(Node removeNode) {
-        Task task = removeNode.data;
         Node next = removeNode.next;
         Node prev = removeNode.prev;
         if (prev == null) {
@@ -64,22 +61,26 @@ public class InMemoryHistoryManager implements HistoryManager {
             removeNode.next = null;
         }
         removeNode.data = null;
-        size--;
     }
 
     @Override
     public void remove(long id) {
-        removeNode(map.get(id));
+        long nodeId = id != 0 ? id : head.data.getId();
+        removeNode(map.get(nodeId));
+        map.remove(nodeId);
     }
+//А если у нас задача с id=0 , то тогда если мы ее захотим удалить(а она где-то в середине) , то удалиться первый
+//элемент. Тогда надо будет как-то предусмотреть , чтобы  айдишник с 0 не выдавался задачам? Или сделать два метода:
+// remove и removeFirstNode;
 
     private List<Task> getTasks() {
-        List<Task> list = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
         Node node = head;
         while (node != null) {
-            list.add(node.data);
+            tasks.add(node.data);
             node = node.next;
         }
-        return list;
+        return tasks;
     }
 
     @Override
@@ -88,6 +89,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     public int size() {
-        return size;
+        return map.size();
     }
 }

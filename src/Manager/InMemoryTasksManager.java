@@ -6,23 +6,23 @@ import java.util.*;
 
 public class InMemoryTasksManager implements TaskManager {
     private List<Task> allTypeTask = new ArrayList<>();
-    private InMemoryHistoryManager listHistory = new InMemoryHistoryManager();
+    private InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
-    public List<Task> getListHistory() {
-        return listHistory.getHistory();
+    public List<Task> getHistoryManager() {
+        return historyManager.getHistory();
     }
 
     public void removeTaskInHistory(long id) {
-        listHistory.remove(id);
+        historyManager.remove(id);
     }
 
     public void getTaskById(long id) {
         Task taskById = findTaskById(id);
-        if (listHistory.size() < 10) {
-            listHistory.add(taskById);
+        if (historyManager.size() < 10) {
+            historyManager.add(taskById);
         } else {
-            listHistory.remove(0);
-            listHistory.add(taskById);
+            historyManager.remove(0);
+            historyManager.add(taskById);
         }
     }
 
