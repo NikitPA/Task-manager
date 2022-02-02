@@ -2,24 +2,27 @@ package manager;
 
 import tasks.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class InMemoryTasksManager implements TaskManager {
     private List<Task> allTypeTask = new ArrayList<>();
-    private List<Task> seenTask = new ArrayList<>();
+    private InMemoryHistoryManager listHistory = new InMemoryHistoryManager();
 
-    public List<Task> history() {
-        return seenTask;
+    public List<Task> getListHistory() {
+        return listHistory.getHistory();
+    }
+
+    public void removeTaskInHistory(long id) {
+        listHistory.remove(id);
     }
 
     public void getTaskById(long id) {
         Task taskById = findTaskById(id);
-        if (seenTask.size() < 10) {
-            seenTask.add(taskById);
+        if (listHistory.size() < 10) {
+            listHistory.add(taskById);
         } else {
-            seenTask.remove(0);
-            seenTask.add(taskById);
+            listHistory.remove(0);
+            listHistory.add(taskById);
         }
     }
 
@@ -33,7 +36,6 @@ public class InMemoryTasksManager implements TaskManager {
         }
         return null;
     }
-
 
     public List<Task> getAllTypeTask() {
         return allTypeTask;

@@ -18,8 +18,6 @@ public interface TaskManager {
 
     List<Task> getAllSubTaskOfEpic(long idEpic);
 
-    void getTaskById(long id);
-
     void addTaskOrEpic(Task task);
 
     void addSubTask(SubTask subTask, Epic epicSubtasks);
@@ -41,6 +39,4 @@ public interface TaskManager {
     boolean setStatusNewEpic(Epic epic);
 
     boolean setStatusProgressEpic(Epic epic);
-
-    List<Task> history();
 }
