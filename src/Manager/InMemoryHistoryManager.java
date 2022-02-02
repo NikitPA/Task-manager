@@ -65,13 +65,14 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(long id) {
-        long nodeId = id != 0 ? id : head.data.getId();
-        removeNode(map.get(nodeId));
-        map.remove(nodeId);
+        removeNode(map.get(id));
+        map.remove(id);
     }
-//А если у нас задача с id=0 , то тогда если мы ее захотим удалить(а она где-то в середине) , то удалиться первый
-//элемент. Тогда надо будет как-то предусмотреть , чтобы  айдишник с 0 не выдавался задачам? Или сделать два метода:
-// remove и removeFirstNode;
+
+    public void removeFirstNode() {
+        long nodeId = head.data.getId();
+        remove(nodeId);
+    }
 
     private List<Task> getTasks() {
         List<Task> tasks = new ArrayList<>();

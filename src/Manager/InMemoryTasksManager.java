@@ -21,7 +21,7 @@ public class InMemoryTasksManager implements TaskManager {
         if (historyManager.size() < 10) {
             historyManager.add(taskById);
         } else {
-            historyManager.remove(0);
+            historyManager.removeFirstNode();
             historyManager.add(taskById);
         }
     }
@@ -105,6 +105,7 @@ public class InMemoryTasksManager implements TaskManager {
             return;
         if (!(task instanceof SubTask)) {
             allTypeTask.remove(task);
+            historyManager.remove(idRemoveTask);
         } else {
             System.out.println("Для удаления SubTask другой метод");
         }
@@ -119,6 +120,7 @@ public class InMemoryTasksManager implements TaskManager {
         for (int i = 0; i < allTypeTask.size(); i++) {
             if (allTypeTask.get(i) instanceof SubTask) {
                 if (((SubTask) allTypeTask.get(i)).getIdEpic() == epic.getId()) {
+                    historyManager.remove(allTypeTask.get(i).getId());
                     allTypeTask.remove(allTypeTask.get(i));
                     i--;
                 }
@@ -141,6 +143,7 @@ public class InMemoryTasksManager implements TaskManager {
             return;
         allTypeTask.remove(subtask);
         epicSubtask.getSubTasks().remove(subtask);
+        historyManager.remove(idRemoveSubtask);
     }
 
 
