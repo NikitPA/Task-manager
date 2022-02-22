@@ -5,8 +5,8 @@ import tasks.*;
 import java.util.*;
 
 public class InMemoryTasksManager implements TaskManager {
-    private List<Task> allTypeTask = new ArrayList<>();
-    private InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
+    protected List<Task> allTypeTask = new ArrayList<>();
+    protected InMemoryHistoryManager historyManager = (InMemoryHistoryManager) Managers.getDefaultHistoryManager();
 
     public List<Task> getHistoryManager() {
         return historyManager.getHistory();
@@ -26,7 +26,7 @@ public class InMemoryTasksManager implements TaskManager {
         }
     }
 
-    private Task findTaskById(long id) {
+    protected Task findTaskById(long id) {
         Task taskById;
         for (int i = 0; i < allTypeTask.size(); i++) {
             if (allTypeTask.get(i).getId() == id) {

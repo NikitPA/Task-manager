@@ -4,11 +4,9 @@ import tasks.Epic;
 import tasks.SubTask;
 import tasks.Task;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public interface TaskManager {
-    List<Task> allTypeTask = new ArrayList<>();
 
     List<Task> getAllTypeTask();
 
