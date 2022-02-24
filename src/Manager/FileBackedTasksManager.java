@@ -11,21 +11,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 //Здравствуйте.
-//Немного ввело в спутанье ТЗ. Да и решение моё сложно назвать решение, всё скомканно, очень не нравится.
-//Скидываю ,чтобы проверили логику, после буду пытаться разбить на больше методов(возможно классов), для лучшего
-//восприятия кода, сейчас ужас.
-//Не понял для чего в ТЗ в подсказказ нам сказано завести енум, чем он тут нам поможет(если только там завести
-//TASK("Task"), тогда возможно будет лучше сравнивать, но как понимаю, он еще для чего то, не подскажите?)
-//Также непонятно про статические методы (в ТЗ в подсказке) (Напишите статические методы static String toString
-// (HistoryManager manager) и static List<Integer> fromString(String value) для сохранения и восстановления менеджера
-// истории из CSV.)      Для чего они статические? Никак не пойму.
-//Если будет удобнее, можно и в слак ответить. Заранее спасибо большое!
+//Не знаю нужен ли обязательно проверочный код, для себя его выполнял, когда отправляя на проверку удаляю, если
+//это обязательная часть - то добавлю. И такой еще вопрос: лучше так оставить или создать класс ,который будет
+//заниматься сериализацией, немного внеся декомпозиции?
 
-public class FileBackedTasksManager extends InMemoryTasksManager implements TaskManager {
+public class FileBackedTasksManager extends InMemoryTasksManager{
     private Path path;
 
     public FileBackedTasksManager(Path path) {
-        super();
         this.path = path;
     }
 
@@ -52,36 +45,10 @@ public class FileBackedTasksManager extends InMemoryTasksManager implements Task
                 newFileBacked.getTaskById(Integer.parseInt(str3[j]));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ManagerSaveException();
         }
         return newFileBacked;
     }
-
-    private void save() {
-        try (Writer writer = new FileWriter(String.valueOf(path));) {
-            if (Files.size(path) == 0) {
-                writer.write("id,type,name,status,description,epic,\n");
-            }
-            for (int i = 0; i < allTypeTask.size(); i++)
-                writer.write(toString(allTypeTask.get(i)));
-            writer.write("\n");
-            for (int i = 0; i < historyManager.size(); i++)
-                writer.write(historyManager.getHistory().get(i).getId() + ",");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String toString(Task task) {
-        String infoTask = task.getId() + "," + task.getClass().getSimpleName() + "," + task.getTitle() + "," +
-                task.getStatus() + "," + task.getDescription() + ",";
-        if ("SubTask".equals(task.getClass().getSimpleName())) {
-            return infoTask + ((SubTask) task).getIdEpic() + "," + "\n";
-        } else {
-            return infoTask + "\n";
-        }
-    }
-
 
     @Override
     public void addTaskOrEpic(Task task) {
@@ -164,5 +131,30 @@ public class FileBackedTasksManager extends InMemoryTasksManager implements Task
     public void getTaskById(long id) {
         super.getTaskById(id);
         save();
+    }
+
+    private void save() {
+        try (Writer writer = new FileWriter(String.valueOf(path));) {
+            if (Files.size(path) == 0) {
+                writer.write("id,type,name,status,description,epic,\n");
+            }
+            for (int i = 0; i < allTypeTask.size(); i++)
+                writer.write(toString(allTypeTask.get(i)));
+            writer.write("\n");
+            for (int i = 0; i < historyManager.size(); i++)
+                writer.write(historyManager.getHistory().get(i).getId() + ",");
+        } catch (IOException e) {
+            throw new ManagerSaveException();
+        }
+    }
+
+    private String toString(Task task) {
+        String infoTask = task.getId() + "," + task.getClass().getSimpleName() + "," + task.getTitle() + "," +
+                task.getStatus() + "," + task.getDescription() + ",";
+        if ("SubTask".equals(task.getClass().getSimpleName())) {
+            return infoTask + ((SubTask) task).getIdEpic() + "," + "\n";
+        } else {
+            return infoTask + "\n";
+        }
     }
 }
