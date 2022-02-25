@@ -19,7 +19,7 @@ public class Main {
         fileBackedTasksManager.addSubTask(new SubTask("Go to street", "no later than 5 p.m.", 2, 4),
                 new Epic("Go to street", "Make its each day", 2));
         fileBackedTasksManager.getTaskById(1);
-        fileBackedTasksManager.getTaskById(2);
+        //fileBackedTasksManager.getTaskById(2);
 
         FileBackedTasksManager fileBackedTasksManager1 = FileBackedTasksManager.loadFromFile(Paths.get("fileTasks.csv"));
         System.out.println(fileBackedTasksManager1.getAllTypeTask());

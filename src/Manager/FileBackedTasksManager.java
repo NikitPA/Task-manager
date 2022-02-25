@@ -26,8 +26,9 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
             newFileBacked = new FileBackedTasksManager(path);
             for (int i = 1; i < str.length; i++) {
                 String[] str2 = str[i].split(",");
-                if(str2.length > 2) {
-                    //здесь непонятно как задать ограничение, просто двойка выглядит нелепо...
+                if (str2[0].equals("")) {
+                    break;
+                }
                     TypeTasks type = TypeTasks.valueOf(str2[1]);
                     switch (type) {
                         case TASK:
@@ -41,7 +42,7 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
                                     Integer.parseInt(str2[0])), (Epic) newFileBacked.findTaskById(Integer.parseInt(str2[5])));
                             break;
                     }
-                }
+
             }
             String[] str3 = str[str.length - 1].split(",");
             for (int j = 0; j < str3.length; j++) {
