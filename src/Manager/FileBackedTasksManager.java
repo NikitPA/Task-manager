@@ -10,12 +10,8 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-//Здравствуйте.
-//Не знаю нужен ли обязательно проверочный код, для себя его выполнял, когда отправляя на проверку удаляю, если
-//это обязательная часть - то добавлю. И такой еще вопрос: лучше так оставить или создать класс ,который будет
-//заниматься сериализацией, немного внеся декомпозиции?
+public class FileBackedTasksManager extends InMemoryTasksManager {
 
-public class FileBackedTasksManager extends InMemoryTasksManager{
     private Path path;
 
     public FileBackedTasksManager(Path path) {
@@ -30,15 +26,22 @@ public class FileBackedTasksManager extends InMemoryTasksManager{
             newFileBacked = new FileBackedTasksManager(path);
             for (int i = 1; i < str.length; i++) {
                 String[] str2 = str[i].split(",");
-                if (str2.length == 5) {
-                    if ("Task".equals(str2[1]))
-                        newFileBacked.addTaskOrEpic(new Task(str2[2], str2[4], Integer.parseInt(str2[0])));
-                    else
-                        newFileBacked.addTaskOrEpic(new Epic(str2[2], str2[4], Integer.parseInt(str2[0])));
+                if(str2.length > 2) {
+                    //здесь непонятно как задать ограничение, просто двойка выглядит нелепо...
+                    TypeTasks type = TypeTasks.valueOf(str2[1]);
+                    switch (type) {
+                        case TASK:
+                            newFileBacked.addTaskOrEpic(new Task(str2[2], str2[4], Integer.parseInt(str2[0])));
+                            break;
+                        case EPIC:
+                            newFileBacked.addTaskOrEpic(new Epic(str2[2], str2[4], Integer.parseInt(str2[0])));
+                            break;
+                        case SUBTASK:
+                            newFileBacked.addSubTask(new SubTask(str2[2], str2[4], Integer.parseInt(str2[5]),
+                                    Integer.parseInt(str2[0])), (Epic) newFileBacked.findTaskById(Integer.parseInt(str2[5])));
+                            break;
+                    }
                 }
-                if (str2.length == 6)
-                    newFileBacked.addSubTask(new SubTask(str2[2], str2[4], Integer.parseInt(str2[5]),
-                            Integer.parseInt(str2[0])), (Epic) newFileBacked.findTaskById(Integer.parseInt(str2[5])));
             }
             String[] str3 = str[str.length - 1].split(",");
             for (int j = 0; j < str3.length; j++) {
@@ -149,12 +152,17 @@ public class FileBackedTasksManager extends InMemoryTasksManager{
     }
 
     private String toString(Task task) {
-        String infoTask = task.getId() + "," + task.getClass().getSimpleName() + "," + task.getTitle() + "," +
+        TypeTasks type = TypeTasks.valueOf(task.getClass().getSimpleName().toUpperCase());
+        String infoTask = task.getId() + "," + type + "," + task.getTitle() + "," +
                 task.getStatus() + "," + task.getDescription() + ",";
-        if ("SubTask".equals(task.getClass().getSimpleName())) {
-            return infoTask + ((SubTask) task).getIdEpic() + "," + "\n";
-        } else {
-            return infoTask + "\n";
+        switch (type) {
+            case SUBTASK:
+                return infoTask + ((SubTask) task).getIdEpic() + "," + "\n";
+            case TASK:
+            case EPIC:
+                return infoTask + "\n";
         }
+       return null;
     }
 }
+

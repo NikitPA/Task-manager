@@ -1,0 +1,8 @@
+id,type,name,status,description,epic,
+0,TASK,Make tasks,NEW,make before 10 p.m.,
+1,TASK,Buy computer,NEW,buy in monday,
+2,EPIC,Go to street,NEW,Make its each day,
+3,SUBTASK,Make it with sister,NEW,today,2,
+4,SUBTASK,Go to street,NEW,no later than 5 p.m.,2,
+
+1,2,
