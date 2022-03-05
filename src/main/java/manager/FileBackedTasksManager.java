@@ -9,44 +9,38 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class FileBackedTasksManager extends InMemoryTasksManager {
 
+    public static final DateTimeFormatter FORMAT_DATE_CREATURE = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private Path path;
+
+    private static FileBackedTasksManager newFileBacked = null;
 
     public FileBackedTasksManager(Path path) {
         this.path = path;
     }
 
     public static FileBackedTasksManager loadFromFile(Path path) {
-        FileBackedTasksManager newFileBacked = null;
         try {
             String unpacking = Files.readString(path);
             String[] str = unpacking.split("\n");
             newFileBacked = new FileBackedTasksManager(path);
             for (int i = 1; i < str.length; i++) {
+                int count = 0;
                 String[] str2 = str[i].split(",");
                 if (str2[0].equals("")) {
-                    break;
-                }
-                    TypeTasks type = TypeTasks.valueOf(str2[1]);
-                    switch (type) {
-                        case TASK:
-                            newFileBacked.addTaskOrEpic(new Task(str2[2], str2[4], Integer.parseInt(str2[0])));
-                            break;
-                        case EPIC:
-                            newFileBacked.addTaskOrEpic(new Epic(str2[2], str2[4], Integer.parseInt(str2[0])));
-                            break;
-                        case SUBTASK:
-                            newFileBacked.addSubTask(new SubTask(str2[2], str2[4], Integer.parseInt(str2[5]),
-                                    Integer.parseInt(str2[0])), (Epic) newFileBacked.findTaskById(Integer.parseInt(str2[5])));
-                            break;
+                    count++;
+                } else if (count == 1) {
+                    for (int j = 0; j < str2.length; j++) {
+                        newFileBacked.getTaskById(Integer.parseInt(str2[j]));
                     }
-
-            }
-            String[] str3 = str[str.length - 1].split(",");
-            for (int j = 0; j < str3.length; j++) {
-                newFileBacked.getTaskById(Integer.parseInt(str3[j]));
+                } else {
+                    TypeTasks type = TypeTasks.valueOf(str2[1]);
+                    newFileBacked.createTasksByTypeTasks(type, str2);
+                }
             }
         } catch (IOException e) {
             throw new ManagerSaveException();
@@ -55,39 +49,45 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
     }
 
     @Override
-    public void addTaskOrEpic(Task task) {
-        super.addTaskOrEpic(task);
+    public boolean addTaskOrEpic(Task task) {
+        boolean isAdd = super.addTaskOrEpic(task);
         save();
+        return isAdd;
     }
 
     @Override
-    public void addSubTask(SubTask subTask, Epic epicSubtasks) {
-        super.addSubTask(subTask, epicSubtasks);
+    public boolean addSubTask(SubTask subTask) {
+        boolean isAdd = super.addSubTask(subTask);
         save();
+        return isAdd;
     }
 
     @Override
-    public void removeTaskOrEpic(long idRemoveTask) {
-        super.removeTaskOrEpic(idRemoveTask);
+    public boolean removeTaskOrEpic(long idRemoveTask) {
+        boolean isRemove = super.removeTaskOrEpic(idRemoveTask);
         save();
+        return isRemove;
     }
 
     @Override
-    public void removeAllSubtaskOfDeletedEpic(Epic epic) {
-        super.removeAllSubtaskOfDeletedEpic(epic);
+    public boolean removeAllSubtaskOfDeletedEpic(Epic epic) {
+        boolean isRemove = super.removeAllSubtaskOfDeletedEpic(epic);
         save();
+        return isRemove;
     }
 
     @Override
-    public void removeAllTypeTask() {
-        super.removeAllTypeTask();
+    public boolean removeAllTypeTask() {
+        boolean isDelete = super.removeAllTypeTask();
         save();
+        return isDelete;
     }
 
     @Override
-    public void removeSubtask(long idRemoveSubtask, Epic epicSubtask) {
-        super.removeSubtask(idRemoveSubtask, epicSubtask);
+    public boolean removeSubtask(long idRemoveSubtask) {
+        boolean isRemoveSubtasks = super.removeSubtask(idRemoveSubtask);
         save();
+        return isRemoveSubtasks;
     }
 
     @Override
@@ -119,8 +119,8 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
     }
 
     @Override
-    public boolean updateSubtask(Task updateTask, long id, Epic epicSubtask) {
-        boolean isUpdate = super.updateSubtask(updateTask, id, epicSubtask);
+    public boolean updateSubtask(SubTask updateTask, long id) {
+        boolean isUpdate = super.updateSubtask(updateTask, id);
         save();
         return isUpdate;
     }
@@ -140,7 +140,7 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
     private void save() {
         try (Writer writer = new FileWriter(String.valueOf(path));) {
             if (Files.size(path) == 0) {
-                writer.write("id,type,name,status,description,epic,\n");
+                writer.write("id,type,name,status,description,epic,duration,startTime,\n");
             }
             for (int i = 0; i < allTypeTask.size(); i++)
                 writer.write(toString(allTypeTask.get(i)));
@@ -155,7 +155,8 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
     private String toString(Task task) {
         TypeTasks type = TypeTasks.valueOf(task.getClass().getSimpleName().toUpperCase());
         String infoTask = task.getId() + "," + type + "," + task.getTitle() + "," +
-                task.getStatus() + "," + task.getDescription() + ",";
+                task.getStatus() + "," + task.getDescription() + "," + task.getDuration() + "," +
+                task.getStartTime().format(FORMAT_DATE_CREATURE) + ",";
         switch (type) {
             case SUBTASK:
                 return infoTask + ((SubTask) task).getIdEpic() + "," + "\n";
@@ -163,7 +164,25 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
             case EPIC:
                 return infoTask + "\n";
         }
-       return null;
+        return null;
+    }
+
+    public void createTasksByTypeTasks(TypeTasks type, String[] str2) {
+        switch (type) {
+            case TASK:
+                newFileBacked.addTaskOrEpic(new Task(str2[2], str2[4], Integer.parseInt(str2[0]),
+                        Integer.parseInt(str2[5]), LocalDateTime.parse(str2[6], FORMAT_DATE_CREATURE)));
+                break;
+            case EPIC:
+                newFileBacked.addTaskOrEpic(new Epic(str2[2], str2[4], Integer.parseInt(str2[0]),
+                        Integer.parseInt(str2[5]), LocalDateTime.parse(str2[6], FORMAT_DATE_CREATURE)));
+                break;
+            case SUBTASK:
+                newFileBacked.addSubTask(new SubTask(str2[2], str2[4], Integer.parseInt(str2[7]),
+                        Integer.parseInt(str2[0]), Integer.parseInt(str2[5]),
+                        LocalDateTime.parse(str2[6], FORMAT_DATE_CREATURE)));
+                break;
+        }
     }
 }
 

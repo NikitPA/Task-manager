@@ -1,0 +1,53 @@
+package tasks;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+public class Epic extends Task {
+
+    protected ArrayList<SubTask> subTasks = new ArrayList<>();
+
+    public Epic(String title, String description, long id, int duration, LocalDateTime startTime) {
+        super(title, description, id, duration, startTime);
+        setDuration();
+        setStartTime();
+    }
+
+    public ArrayList<SubTask> getSubTasks() {
+        return subTasks;
+    }
+
+    public void setSubTasks(SubTask subTask) {
+        this.subTasks.add(subTask);
+    }
+
+    public void setDuration() {
+        int duration = 0;
+        for (int i = 0; i < subTasks.size(); i++) {
+            duration += subTasks.get(i).getDuration();
+        }
+        super.setDuration(duration);
+    }
+
+    public void setStartTime() {
+        LocalDateTime startTime = LocalDateTime.MAX;
+        for (int i = 0; i < subTasks.size(); i++) {
+            if (subTasks.get(i).getStartTime().isBefore(startTime)) {
+                startTime = subTasks.get(i).getStartTime();
+            }
+        }
+        super.setStartTime(startTime);
+    }
+
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "title='" + getTitle() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", id=" + getId() +
+                ", status=" + getStatus() +
+                ", duration=" + getDuration() +
+                ", startTime=" + getStartTime() +
+                '}';
+    }
+}

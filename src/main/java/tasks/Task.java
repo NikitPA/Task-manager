@@ -1,19 +1,39 @@
 package tasks;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Task {
+public class Task implements Comparable<Task> {
     private String title;
     private String description;
     private long id;
     private Status status = Status.NEW;
+    private int duration;
+    private LocalDateTime startTime;
 
-    public Task(String title, String description, long id) {
+    public Task(String title, String description, long id, int duration, LocalDateTime startTime) {
         this.title = title;
         this.description = description;
         this.id = id;
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
 
     public String getTitle() {
         return title;
@@ -41,7 +61,9 @@ public class Task {
                 "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", id=" + id +
-                ", status='" + status + '\'' +
+                ", status=" + status +
+                ", duration=" + duration +
+                ", startTime=" + startTime +
                 '}';
     }
 
@@ -56,5 +78,15 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(status);
+    }
+
+    @Override
+    public int compareTo(Task o) {
+        if (this.getStartTime().isBefore(o.getStartTime())) {
+            return -1;
+        } else if (!(this.getStartTime().isBefore(o.getStartTime()))) {
+            return 1;
+        } else
+            return 0;
     }
 }
