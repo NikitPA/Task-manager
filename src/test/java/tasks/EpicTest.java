@@ -4,12 +4,9 @@ import manager.Managers;
 import manager.TaskManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import tasks.Epic;
-import tasks.Status;
-import tasks.SubTask;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 
 public class EpicTest {
 
@@ -21,7 +18,7 @@ public class EpicTest {
     @Test
     public void epicListShouldEmpty(){
         taskManager = Managers.getDefault();
-        Assertions.assertEquals(new ArrayList<>(), taskManager.getAllEpic());
+        Assertions.assertEquals(Collections.emptyList(), taskManager.getAllEpic());
     }
 
     @Test
@@ -58,7 +55,7 @@ public class EpicTest {
 
     private void createEpicWithSubTask(){
         taskManager = Managers.getDefault();
-        epic = new Epic("" ,"",0,3, LocalDateTime.MIN);
+        epic = new Epic("" ,"",0);
         subTask = new SubTask("","",0,1,20,LocalDateTime.MIN);
         subTask1 = new SubTask("","",0,2,20,LocalDateTime.MIN);
         taskManager.addTaskOrEpic(epic);

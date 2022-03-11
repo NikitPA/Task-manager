@@ -1,5 +1,6 @@
 package manager;
 
+import exception.ManagerSaveException;
 import tasks.Epic;
 import tasks.SubTask;
 import tasks.Task;
@@ -11,11 +12,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class FileBackedTasksManager extends InMemoryTasksManager {
 
     public static final DateTimeFormatter FORMAT_DATE_CREATURE = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-    private Path path;
+    private final Path path;
 
     private static FileBackedTasksManager newFileBacked = null;
 
@@ -34,8 +36,8 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
                 if (str2[0].equals("")) {
                     count++;
                 } else if (count == 1) {
-                    for (int j = 0; j < str2.length; j++) {
-                        newFileBacked.getTaskById(Integer.parseInt(str2[j]));
+                    for (String s : str2) {
+                        newFileBacked.getTaskById(Integer.parseInt(s));
                     }
                 } else {
                     TypeTasks type = TypeTasks.valueOf(str2[1]);
@@ -138,12 +140,12 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
     }
 
     private void save() {
-        try (Writer writer = new FileWriter(String.valueOf(path));) {
+        try (Writer writer = new FileWriter(String.valueOf(path))) {
             if (Files.size(path) == 0) {
                 writer.write("id,type,name,status,description,epic,duration,startTime,\n");
             }
-            for (int i = 0; i < allTypeTask.size(); i++)
-                writer.write(toString(allTypeTask.get(i)));
+            for (Task task : allTypeTask)
+                writer.write(Objects.requireNonNull(toString(task)));
             writer.write("\n");
             for (int i = 0; i < historyManager.size(); i++)
                 writer.write(historyManager.getHistory().get(i).getId() + ",");

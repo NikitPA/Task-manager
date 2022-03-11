@@ -19,6 +19,12 @@ public class Task implements Comparable<Task> {
         this.startTime = startTime;
     }
 
+    public Task(String title, String description, long id) {
+        this.title = title;
+        this.description = description;
+        this.id = id;
+    }
+
     public int getDuration() {
         return duration;
     }
@@ -72,12 +78,12 @@ public class Task implements Comparable<Task> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return Objects.equals(status, task.status);
+        return id == task.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(status);
+        return Objects.hash(id);
     }
 
     @Override

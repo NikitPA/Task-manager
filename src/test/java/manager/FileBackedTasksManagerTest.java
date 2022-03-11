@@ -1,6 +1,5 @@
 package manager;
 
-import manager.FileBackedTasksManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
@@ -49,7 +48,7 @@ public class FileBackedTasksManagerTest {
         fileBacked = new FileBackedTasksManager(Paths.get("fileTasks.csv"));
         task = new Task("", "", 0, 20, LocalDateTime.of
                 (2000, 1, 1, 1, 1));
-        epic = new Epic("", "", 2, 20, LocalDateTime.MAX);
+        epic = new Epic("", "", 2);
         subTask = new SubTask("", "", 2, 3, 20, LocalDateTime.of
                 (2020, 2, 2, 2, 2));
         subTaskTwo = new SubTask("", "", 2, 4, 20, LocalDateTime.of

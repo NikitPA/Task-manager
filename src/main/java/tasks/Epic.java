@@ -6,9 +6,17 @@ import java.util.ArrayList;
 public class Epic extends Task {
 
     protected ArrayList<SubTask> subTasks = new ArrayList<>();
+    private int duration = 0;
+    private LocalDateTime startTime = LocalDateTime.MAX;
 
     public Epic(String title, String description, long id, int duration, LocalDateTime startTime) {
-        super(title, description, id, duration, startTime);
+        super(title,description,id,duration,startTime);
+        this.duration = duration;
+        this.startTime = startTime;
+    }
+
+    public Epic(String title, String description, long id) {
+        super(title, description, id);
         setDuration();
         setStartTime();
     }
@@ -22,7 +30,6 @@ public class Epic extends Task {
     }
 
     public void setDuration() {
-        int duration = 0;
         for (int i = 0; i < subTasks.size(); i++) {
             duration += subTasks.get(i).getDuration();
         }
@@ -30,7 +37,6 @@ public class Epic extends Task {
     }
 
     public void setStartTime() {
-        LocalDateTime startTime = LocalDateTime.MAX;
         for (int i = 0; i < subTasks.size(); i++) {
             if (subTasks.get(i).getStartTime().isBefore(startTime)) {
                 startTime = subTasks.get(i).getStartTime();

@@ -1,20 +1,19 @@
 package manager;
 
-import manager.Managers;
-import manager.TaskManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import tasks.Task;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class HistoryManagerTest {
 
     @Test
     public void historyManagerShouldEmpty() {
         TaskManager taskManager = Managers.getDefault();
-        Assertions.assertEquals(new ArrayList<>(), taskManager.getHistoryManager());
+        Assertions.assertEquals(Collections.emptyList(), taskManager.getHistoryManager());
     }
 
     @Test
@@ -25,5 +24,18 @@ public class HistoryManagerTest {
         taskManager.getTaskById(task.getId());
         taskManager.getTaskById(task.getId());
         Assertions.assertEquals(1, taskManager.getHistoryManager().size());
+    }
+
+    @Test
+    public void addedTaksInHistoryManagerShouldBeInList(){
+        TaskManager taskManager = Managers.getDefault();
+        Task task = new Task("", "", 1, 20, LocalDateTime.MIN);
+        Task task1 = new Task("", "", 2, 20, LocalDateTime.MAX);
+        taskManager.addTaskOrEpic(task);
+        taskManager.addTaskOrEpic(task1);
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task1.getId());
+        taskManager.getHistoryManager();
+        Assertions.assertEquals(List.of(task,task1), taskManager.getHistoryManager());
     }
 }
