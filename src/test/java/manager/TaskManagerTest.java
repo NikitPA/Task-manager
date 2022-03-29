@@ -160,8 +160,6 @@ class TaskManagerTest {
         taskManager.addSubTask(subTask);
         taskManager.addSubTask(subTaskTwo);
         assertEquals(List.of(subTask, subTaskTwo), epic.getSubTasks());
-        taskManager.removeAllSubtaskOfDeletedEpic(epic);
-        assertEquals(Collections.emptyList(), epic.getSubTasks());
     }
 
     @Test

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -21,13 +22,13 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
 
     private static FileBackedTasksManager newFileBacked = null;
 
-    public FileBackedTasksManager(Path path) {
-        this.path = path;
+    public FileBackedTasksManager(String path) {
+        this.path = Paths.get(path);
     }
 
-    public static FileBackedTasksManager loadFromFile(Path path) {
+    public static FileBackedTasksManager loadFromFile(String path) {
         try {
-            String unpacking = Files.readString(path);
+            String unpacking = Files.readString(Paths.get(path));
             String[] str = unpacking.split("\n");
             newFileBacked = new FileBackedTasksManager(path);
             for (int i = 1; i < str.length; i++) {
@@ -134,12 +135,13 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
     }
 
     @Override
-    public void getTaskById(long id) {
-        super.getTaskById(id);
+    public Task getTaskById(long id) {
+        Task task = super.getTaskById(id);
         save();
+        return task;
     }
 
-    private void save() {
+    public void save() {
         try (Writer writer = new FileWriter(String.valueOf(path))) {
             if (Files.size(path) == 0) {
                 writer.write("id,type,name,status,description,epic,duration,startTime,\n");

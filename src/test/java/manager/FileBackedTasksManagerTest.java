@@ -20,7 +20,7 @@ public class FileBackedTasksManagerTest {
 
     @Test
     public void createEmptyFileBackedManagersShouldWithEmptyList() {
-        fileBacked = new FileBackedTasksManager(Paths.get("fileTasks.csv"));
+        fileBacked = new FileBackedTasksManager("fileTasks.csv");
         Assertions.assertEquals(List.of(), fileBacked.getAllTypeTask());
     }
 
@@ -40,12 +40,12 @@ public class FileBackedTasksManagerTest {
     @Test
     public void loadedFileBackedManagersShouldLoadSavedFile() {
         createFileBackedManagersWithTasks();
-        FileBackedTasksManager fileBackedTasksManager = FileBackedTasksManager.loadFromFile(Paths.get("fileTasks.csv"));
+        FileBackedTasksManager fileBackedTasksManager = FileBackedTasksManager.loadFromFile("fileTasks.csv");
         Assertions.assertEquals(List.of(task, epic, subTask, subTaskTwo), fileBackedTasksManager.getAllTypeTask());
     }
 
     private void createFileBackedManagersWithTasks() {
-        fileBacked = new FileBackedTasksManager(Paths.get("fileTasks.csv"));
+        fileBacked = new FileBackedTasksManager("fileTasks.csv");
         task = new Task("", "", 0, 20, LocalDateTime.of
                 (2000, 1, 1, 1, 1));
         epic = new Epic("", "", 2);

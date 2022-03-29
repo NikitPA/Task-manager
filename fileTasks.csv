@@ -1,6 +1,4 @@
 id,type,name,status,description,epic,duration,startTime,
-0,TASK,,NEW,,20,01.01.2000 01:01,
-2,EPIC,,NEW,,60,02.02.2020 02:02,
-3,SUBTASK,,NEW,,20,02.02.2020 02:02,2,
-4,SUBTASK,,NEW,,20,02.02.2030 02:02,2,
+1,EPIC,titttt,NEW,Eoic1,20,18.03.2130 10:35,
+10,SUBTASK,SO7tt,NEW,PCTBE7,20,18.03.2130 10:35,1,
 
