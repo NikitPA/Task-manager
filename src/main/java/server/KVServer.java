@@ -1,3 +1,5 @@
+package server;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
@@ -6,9 +8,6 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Постман: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
- */
 public class KVServer {
     public static final int PORT = 8078;
     private final String API_KEY;
@@ -67,7 +66,6 @@ public class KVServer {
                 h.close();
             }
         });
-        // TODO Вот эту часть сами
         server.createContext("/load", (h) -> {
             try {
                 System.out.println("\n/load");
@@ -108,6 +106,10 @@ public class KVServer {
         System.out.println("Открой в браузере http://localhost:" + PORT + "/");
         System.out.println("API_KEY: " + API_KEY);
         server.start();
+    }
+
+    public void stop() {
+        server.stop(0);
     }
 
     private String generateApiKey() {

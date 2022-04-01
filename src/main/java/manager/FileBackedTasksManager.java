@@ -135,10 +135,10 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
     }
 
     @Override
-    public Task getTaskById(long id) {
-        Task task = super.getTaskById(id);
+    public boolean getTaskById(long id) {
+        super.getTaskById(id);
         save();
-        return task;
+        return true;
     }
 
     public void save() {

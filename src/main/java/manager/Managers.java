@@ -1,11 +1,20 @@
 package manager;
 
-import java.nio.file.Paths;
+import server.HTTPTaskManager;
+
+import java.io.IOException;
 
 public class Managers {
 
     public static TaskManager getDefault() {
-        return new InMemoryTasksManager();
+        try {
+            return new HTTPTaskManager("http://localhost:8078/register");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static TaskManager getDefaultFileBacked() {

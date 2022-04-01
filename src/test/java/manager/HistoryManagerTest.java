@@ -12,7 +12,7 @@ public class HistoryManagerTest {
 
     @Test
     public void historyManagerShouldEmpty() {
-        TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = new InMemoryTasksManager();
         Assertions.assertEquals(Collections.emptyList(), taskManager.getHistoryManager());
     }
 
@@ -27,8 +27,8 @@ public class HistoryManagerTest {
     }
 
     @Test
-    public void addedTaksInHistoryManagerShouldBeInList(){
-        TaskManager taskManager = Managers.getDefault();
+    public void addedTaksInHistoryManagerShouldBeInList() {
+        TaskManager taskManager = new InMemoryTasksManager();
         Task task = new Task("", "", 1, 20, LocalDateTime.MIN);
         Task task1 = new Task("", "", 2, 20, LocalDateTime.MAX);
         taskManager.addTaskOrEpic(task);
@@ -36,6 +36,6 @@ public class HistoryManagerTest {
         taskManager.getTaskById(task.getId());
         taskManager.getTaskById(task1.getId());
         taskManager.getHistoryManager();
-        Assertions.assertEquals(List.of(task,task1), taskManager.getHistoryManager());
+        Assertions.assertEquals(List.of(task, task1), taskManager.getHistoryManager());
     }
 }

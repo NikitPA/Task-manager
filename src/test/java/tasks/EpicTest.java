@@ -1,5 +1,6 @@
 package tasks;
 
+import manager.InMemoryTasksManager;
 import manager.Managers;
 import manager.TaskManager;
 import org.junit.jupiter.api.Assertions;
@@ -17,7 +18,7 @@ public class EpicTest {
 
     @Test
     public void epicListShouldEmpty(){
-        taskManager = Managers.getDefault();
+        taskManager = new InMemoryTasksManager();
         Assertions.assertEquals(Collections.emptyList(), taskManager.getAllEpic());
     }
 
@@ -54,7 +55,7 @@ public class EpicTest {
     }
 
     private void createEpicWithSubTask(){
-        taskManager = Managers.getDefault();
+        taskManager = new InMemoryTasksManager();
         epic = new Epic("" ,"",0);
         subTask = new SubTask("","",0,1,20,LocalDateTime.MIN);
         subTask1 = new SubTask("","",0,2,20,LocalDateTime.MIN);

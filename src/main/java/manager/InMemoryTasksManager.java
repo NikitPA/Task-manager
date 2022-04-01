@@ -27,7 +27,7 @@ public class InMemoryTasksManager implements TaskManager {
         return prioritizedTasks;
     }
 
-    public Task getTaskById(long id) {
+    public boolean getTaskById(long id) {
         Task taskById = findTaskById(id).get();
         if (historyManager.size() < 10) {
             historyManager.add(taskById);
@@ -35,10 +35,10 @@ public class InMemoryTasksManager implements TaskManager {
             historyManager.removeFirstNode();
             historyManager.add(taskById);
         }
-        return taskById;
+        return true;
     }
 
-    protected Optional<Task> findTaskById(long id) {
+    public Optional<Task> findTaskById(long id) {
         Optional<Task> task = allTypeTask.stream().filter(task1 -> task1.getId() == id).findFirst();
         if (task.isPresent())
             return task;

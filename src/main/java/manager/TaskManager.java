@@ -5,17 +5,18 @@ import tasks.SubTask;
 import tasks.Task;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface TaskManager {
 
     List<Task> getAllTypeTask();
 
-    List<Task> getAllTask();//////////////
+    List<Task> getAllTask();
 
-    List<Task> getAllEpic();/////////////
+    List<Task> getAllEpic();
 
-    List<SubTask> getAllSubTaskOfEpic(long idEpic);////////
+    List<SubTask> getAllSubTaskOfEpic(long idEpic);
 
     Set<Task> getPrioritizedTasks();
 
@@ -23,25 +24,27 @@ public interface TaskManager {
 
     void removeTaskInHistory(long id);
 
-    Task getTaskById(long id);/////////////////////
+    Optional<Task> findTaskById(long id);
 
-    boolean addTaskOrEpic(Task task);/////////////
+    boolean getTaskById(long id);
 
-    boolean addSubTask(SubTask subTask);/////////
+    boolean addTaskOrEpic(Task task);
 
-    boolean updateTaskOrEpic(Task updateTask, long id);///////
+    boolean addSubTask(SubTask subTask);
 
-    boolean updateSubtask(SubTask updateTask, long id);///////
+    boolean updateTaskOrEpic(Task updateTask, long id);
 
-    boolean removeTaskOrEpic(long idRemoveTask);//////////
+    boolean updateSubtask(SubTask updateTask, long id);
 
-    boolean removeSubtask(long idRemoveSubtask);//////////
+    boolean removeTaskOrEpic(long idRemoveTask);
 
-    boolean removeAllTypeTask();///////////
+    boolean removeSubtask(long idRemoveSubtask);
 
-    boolean setStatusDoneEpic(Epic epic);/////////
+    boolean removeAllTypeTask();
 
-    boolean setStatusNewEpic(Epic epic);///////////
+    boolean setStatusDoneEpic(Epic epic);
 
-    boolean setStatusProgressEpic(Epic epic);///////////
+    boolean setStatusNewEpic(Epic epic);
+
+    boolean setStatusProgressEpic(Epic epic);
 }

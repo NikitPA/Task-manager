@@ -25,7 +25,7 @@ class TaskManagerTest {
 
     @BeforeEach
     public void beforeEach() {
-        taskManager = Managers.getDefault();
+        taskManager = new InMemoryTasksManager();
         task = new Task("", "", 0, 20, LocalDateTime.of
                 (2000, 1, 1, 1, 1));
         taskTwo = new Task("", "", 1, 20, LocalDateTime.of
