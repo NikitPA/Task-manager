@@ -14,7 +14,7 @@ public class Managers {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return null;
+        throw new NullPointerException();
     }
 
     public static TaskManager getDefaultFileBacked() {

@@ -15,8 +15,8 @@ import java.util.List;
 
 public class HTTPTaskManager extends FileBackedTasksManager {
 
-    KVTaskClient client;
-    Gson gson;
+    private KVTaskClient client;
+    private Gson gson;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public HTTPTaskManager(String path) throws IOException, InterruptedException {
@@ -73,7 +73,7 @@ public class HTTPTaskManager extends FileBackedTasksManager {
         history.stream().map(task1 -> this.getTaskById(task1.getId()));
     }
 
-    public void stop() {
-        client.stop();
+    public KVTaskClient getClient() {
+        return client;
     }
 }

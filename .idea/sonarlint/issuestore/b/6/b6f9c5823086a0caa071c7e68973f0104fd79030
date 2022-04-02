@@ -1,0 +1,35 @@
+
+b
+java:S62026"GReplace this usage of "Epic.class.isInstance()" with "instanceof Epic".(¸¸Ü¾úÿÿÿÿ
+c
+java:S62027"MReplace this usage of "SubTask.class.isInstance()" with "instanceof SubTask".(«×¡
+b
+java:S6202A"GReplace this usage of "Epic.class.isInstance()" with "instanceof Epic".(ˆ…»³şÿÿÿÿ
+c
+java:S6202H"MReplace this usage of "SubTask.class.isInstance()" with "instanceof SubTask".(Àç¡Á
+:
+java:S1872h"Use "isAssignableFrom" instead.(Ÿº¾®ıÿÿÿÿ
+?	java:S108§")Either remove or fill this block of code.(ú‹«†
+?	java:S108²")Either remove or fill this block of code.(ØÚÿŠ
+K
+java:S1066È"/Merge this if statement with the enclosing one.(‰¥øÚıÿÿÿÿ
+f
+java:S3655w"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(Ôú–Ü
+g
+java:S3655Œ"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(œˆ¯Ù
+g
+java:S3655„"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(¨ã€ø
+k
+java:S3655C"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(÷¿ó…úÿÿÿÿ
+f
+java:S3655f"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(Éæ³Ê
+g
+java:S3655‚"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(—öó‚
+e
+java:S3655"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(êééG
+k
+java:S3655"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(ï—âÄûÿÿÿÿ
+f
+java:S3655X"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(¦®»»
+g
+java:S3655"PCall "Optional#isPresent()" or "!Optional#isEmpty()" before accessing the value.(·ªÿï

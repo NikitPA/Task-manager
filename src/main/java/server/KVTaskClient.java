@@ -9,10 +9,8 @@ import java.net.http.HttpResponse;
 public class KVTaskClient {
 
     private final String API_KEY;
-    KVServer kvServer = new KVServer();
 
     public KVTaskClient(String uri) throws IOException, InterruptedException {
-        kvServer.start();
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create(uri);
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
@@ -36,7 +34,4 @@ public class KVTaskClient {
         return response.body();
     }
 
-    public void stop() {
-        kvServer.stop();
-    }
 }

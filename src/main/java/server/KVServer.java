@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KVServer {
-    public static final int PORT = 8078;
+    private static final int PORT = 8078;
     private final String API_KEY;
     private HttpServer server;
     private Map<String, String> data = new HashMap<>();
@@ -127,7 +127,6 @@ public class KVServer {
     }
 
     protected void sendText(HttpExchange h, String text) throws IOException {
-        //byte[] resp = jackson.writeValueAsBytes(obj);
         byte[] resp = text.getBytes("UTF-8");
         h.getResponseHeaders().add("Content-Type", "application/json");
         h.sendResponseHeaders(200, resp.length);

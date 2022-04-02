@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.*;
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import manager.Managers;
 import tasks.Epic;
@@ -22,8 +23,9 @@ import java.util.stream.Collectors;
 public class HttpTaskServer {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-    public static final int PORT = 8080;
+    private static final int PORT = 8080;
     private final HttpServer server;
+    private final Gson gson;
     public final HTTPTaskManager taskManager = (HTTPTaskManager) Managers.getDefault();
     static final String TITLE = "title";
     static final String DESCRIPTION = "description";
@@ -32,78 +34,19 @@ public class HttpTaskServer {
     static final String START_TIME = "startTime";
     static final String STATUS = "status";
     static final String ID_EPIC = "idEpic";
+    //Решил так разделить конструктор по методам. Если есть совет как лучше разделить, с удовольствием прочту)
 
     public HttpTaskServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
-        Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class,
+        gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class,
                         (JsonDeserializer<LocalDateTime>) (json, type, jsonDes) ->
                                 LocalDateTime.parse(json.getAsString()))
                 .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>)
                         (src, type, context) -> new JsonPrimitive
                                 (src.format(formatter))).create();
         server.createContext("/tasks/task/", exchange -> {
-            //ДОБАВЛЕНИЕ ЗАДАЧИ(1)++++++++++++
             try {
-                switch (exchange.getRequestMethod()) {
-                    case "POST":
-                        String result = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                        if (result.isEmpty()) {
-                            exchange.sendResponseHeaders(400, 0);
-                        }
-                        JsonElement jsonElement = JsonParser.parseString(result);
-                        JsonObject object = jsonElement.getAsJsonObject();
-                        String s1 = object.get(TITLE).getAsString();
-                        // String s1 = object.get(TITLE).getAsString().isEmpty() ? object.get(TITLE).getAsString() :;
-                        String s2 = object.get(DESCRIPTION).getAsString();
-                        int s3 = object.get(ID).getAsInt();
-                        int s4 = object.get(DURATION).getAsInt();
-                        String s5 = object.get(START_TIME).getAsString();
-                        LocalDateTime localDateTime = LocalDateTime.parse(s5, formatter);
-                        Objects.requireNonNull(taskManager).addTaskOrEpic(new Task(s1, s2, s3, s4, localDateTime));
-
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    //ОБНОВЛЕНИЕ ЗАДАЧИ(2)+++++++++++++++++
-                    case "PUT":
-                        String result1 = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                        if (result1.isEmpty()) {
-                            exchange.sendResponseHeaders(403, 0);
-                        }
-                        JsonElement jsonElement1 = JsonParser.parseString(result1);
-                        JsonObject object1 = jsonElement1.getAsJsonObject();
-                        int s33 = object1.get(ID).getAsInt();
-                        Task task = Objects.requireNonNull(taskManager).findTaskById(s33).get();
-                        task.setTitle(object1.get(TITLE).getAsString());
-                        task.setDescription(object1.get(DESCRIPTION).getAsString());
-                        task.setStatus(Status.valueOf(object1.get(STATUS).getAsString().toUpperCase()));
-                        task.setDuration(object1.get(DURATION).getAsInt());
-                        task.setStartTime(LocalDateTime.parse(object1.get(START_TIME).getAsString(), formatter));
-
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    //+++++++++++++++++++++++++
-                    case "DELETE":
-                        String rawQuery = exchange.getRequestURI().getRawQuery().split("=")[1];
-                        if (rawQuery.isEmpty()) {
-                            exchange.sendResponseHeaders(400, 0);
-                            return;
-                        }
-                        int raw = Integer.parseInt(rawQuery);
-                        taskManager.removeTaskOrEpic(raw);
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    case "GET":
-                        List<Task> list = Objects.requireNonNull(taskManager).getAllTask();
-
-                        String text = gson.toJson(list);
-                        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-                        exchange.getResponseHeaders().add("Content-Type", "application/json");
-                        exchange.sendResponseHeaders(200, resp.length);
-                        exchange.getResponseBody().write(resp);
-                        break;
-                    default:
-                        exchange.sendResponseHeaders(405, 0);
-                }
+                processDifferentHttpMethodsTasks(exchange);
             } catch (NullPointerException | NoSuchElementException e) {
                 exchange.sendResponseHeaders(400, 0);
             } finally {
@@ -111,61 +54,8 @@ public class HttpTaskServer {
             }
         });
         server.createContext("/tasks/epic/", exchange -> {
-            //ДОБАВЛЕНИЕ ЭПИКА(3)
             try {
-                switch (exchange.getRequestMethod()) {
-                    case "POST":
-                        String result = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                        if (result.isEmpty()) {
-                            exchange.sendResponseHeaders(403, 0);
-                        }
-                        JsonElement jsonElement = JsonParser.parseString(result);
-                        JsonObject object = jsonElement.getAsJsonObject();
-                        String s1 = object.get(TITLE).getAsString();
-                        String s2 = object.get(DESCRIPTION).getAsString();
-                        int s3 = object.get(ID).getAsInt();
-                        Objects.requireNonNull(taskManager).addTaskOrEpic(new Epic(s1, s2, s3));
-
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    //ОБНОВЛЕНИЕ ЭПИКА(4)
-                    case "PUT":
-                        String result1 = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                        if (result1.isEmpty()) {
-                            exchange.sendResponseHeaders(403, 0);
-                        }
-                        JsonElement jsonElement1 = JsonParser.parseString(result1);
-                        JsonObject object1 = jsonElement1.getAsJsonObject();
-                        int s33 = object1.get(ID).getAsInt();
-                        Epic task = (Epic) Objects.requireNonNull(taskManager).findTaskById(s33).get();
-                        task.setTitle(object1.get(TITLE).getAsString());
-                        task.setDescription(object1.get(DESCRIPTION).getAsString());
-
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    case "DELETE":
-                        String rawQuery = exchange.getRequestURI().getRawQuery().split("=")[1];
-                        if (rawQuery.isEmpty()) {
-                            exchange.sendResponseHeaders(400, 0);
-                            return;
-                        }
-                        int raw = Integer.parseInt(rawQuery);
-                        Objects.requireNonNull(taskManager).removeTaskOrEpic(raw);
-
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    case "GET":
-                        List<Task> list = Objects.requireNonNull(taskManager).getAllEpic();
-
-                        String text = gson.toJson(list);
-                        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-                        exchange.getResponseHeaders().add("Content-Type", "application/json");
-                        exchange.sendResponseHeaders(200, resp.length);
-                        exchange.getResponseBody().write(resp);
-                        break;
-                    default:
-                        exchange.sendResponseHeaders(405, 0);
-                }
+                processDifferentHttpMethodsEpic(exchange);
             } catch (NullPointerException | NoSuchElementException e) {
                 exchange.sendResponseHeaders(400, 0);
             } finally {
@@ -173,64 +63,8 @@ public class HttpTaskServer {
             }
         });
         server.createContext("/tasks/subtask/", exchange -> {
-            //ДОБАВЕНИЕ ПОДЗАДАЧИ(5)
             try {
-                switch (exchange.getRequestMethod()) {
-                    case "POST":
-                        String result = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                        if (result.isEmpty()) {
-                            exchange.sendResponseHeaders(403, 0);
-                        }
-                        JsonElement jsonElement = JsonParser.parseString(result);
-                        JsonObject object = jsonElement.getAsJsonObject();
-                        String s1 = object.get(TITLE).getAsString();
-                        String s2 = object.get(DESCRIPTION).getAsString();
-                        int s3 = object.get(ID).getAsInt();
-                        int s6 = object.get(ID_EPIC).getAsInt();
-                        int s4 = object.get(DURATION).getAsInt();
-                        String s5 = object.get(START_TIME).getAsString();
-                        LocalDateTime localDateTime = LocalDateTime.parse(s5, formatter);
-                        Objects.requireNonNull(taskManager).addSubTask(new SubTask(s1, s2, s6, s3, s4, localDateTime));
-
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    //ОБНОВЛЕНИЕ ПОДЗАДАЧИ(6)
-                    case "PUT":
-                        String result1 = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                        if (result1.isEmpty()) {
-                            exchange.sendResponseHeaders(403, 0);
-                        }
-                        JsonElement jsonElement1 = JsonParser.parseString(result1);
-                        JsonObject object1 = jsonElement1.getAsJsonObject();
-                        int s33 = object1.get(ID).getAsInt();
-                        SubTask task = (SubTask) Objects.requireNonNull(taskManager).findTaskById(s33).get();
-                        task.setTitle(object1.get(TITLE).getAsString());
-                        task.setDescription(object1.get(DESCRIPTION).getAsString());
-                        task.setStatus(Status.valueOf(object1.get(STATUS).getAsString().toUpperCase()));
-                        task.setDuration(object1.get(DURATION).getAsInt());
-                        task.setStartTime(LocalDateTime.parse(object1.get(START_TIME).getAsString(), formatter));
-
-                        Epic epic = (Epic) taskManager.findTaskById(task.getIdEpic()).get();
-                        taskManager.setStatusProgressEpic(epic);
-                        taskManager.setStatusNewEpic(epic);
-                        taskManager.setStatusProgressEpic(epic);
-
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    case "DELETE":
-                        String rawQuery = exchange.getRequestURI().getRawQuery().split("=")[1];
-                        if (rawQuery.isEmpty()) {
-                            exchange.sendResponseHeaders(400, 0);
-                            return;
-                        }
-                        int raw = Integer.parseInt(rawQuery);
-                        Objects.requireNonNull(taskManager).removeSubtask(raw);
-
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    default:
-                        exchange.sendResponseHeaders(405, 0);
-                }
+                processDifferentHttpMethodsSubtask(exchange);
             } catch (NullPointerException | NoSuchElementException e) {
                 exchange.sendResponseHeaders(400, 0);
             } finally {
@@ -238,29 +72,8 @@ public class HttpTaskServer {
             }
         });
         server.createContext("/tasks/subtask/epic/", exchange -> {
-            //ПОЛУЧЕНИЕ ПОДЗАДАЧ ЭПИКА(9)
             try {
-                switch (exchange.getRequestMethod()) {
-                    case "GET":
-                        String rawQuery = exchange.getRequestURI().getRawQuery().split("=")[1];
-                        if (rawQuery.isEmpty()) {
-                            exchange.sendResponseHeaders(400, 0);
-                            return;
-                        }
-                        int raw = Integer.parseInt(rawQuery);
-                        List<SubTask> list = Objects.requireNonNull(taskManager).getAllSubTaskOfEpic(raw);
-                        if (list.isEmpty()) {
-                            throw new NullPointerException();
-                        }
-                        String text = gson.toJson(list);
-                        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-                        exchange.getResponseHeaders().add("Content-Type", "application/json");
-                        exchange.sendResponseHeaders(200, resp.length);
-                        exchange.getResponseBody().write(resp);
-                        break;
-                    default:
-                        exchange.sendResponseHeaders(405, 0);
-                }
+                processRequestForGetSubtasksOfEpic(exchange);
             } catch (NullPointerException | NoSuchElementException e) {
                 exchange.sendResponseHeaders(400, 0);
             } finally {
@@ -268,59 +81,15 @@ public class HttpTaskServer {
             }
         });
         server.createContext("/tasks/", exchange -> {
-            //ПОЛУЧЕНИЕ ВСЕХ ТИПОВ ЗАДАЧ(10)
             try {
-                switch (exchange.getRequestMethod()) {
-                    case "GET":
-                        Set<Task> list = Objects.requireNonNull(taskManager).getPrioritizedTasks();
-                        List<Task> list1 = list.stream().filter(SubTask.class::isInstance)
-                                .collect(Collectors.toList());
-                        list1.forEach(list::remove);
-
-                        String text = gson.toJson(list);
-                        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-                        exchange.getResponseHeaders().add("Content-Type", "application/json");
-                        exchange.sendResponseHeaders(200, resp.length);
-                        exchange.getResponseBody().write(resp);
-                        break;
-                    case "DELETE":
-                        taskManager.removeAllTypeTask();
-                        exchange.sendResponseHeaders(200, 0);
-                        break;
-                    default:
-                        exchange.sendResponseHeaders(405, 0);
-                }
+                processRequestOnOutputOrRemoveAllTypeTasks(exchange);
             } finally {
                 exchange.close();
             }
         });
         server.createContext("/tasks/tasks/", exchange -> {
-            //ПОЛУЧЕНИЕ ЗАДАЧИ ПО АЙДИ(11)
             try {
-                switch (exchange.getRequestMethod()) {
-                    case "GET":
-                        String s = exchange.getRequestURI().getRawQuery();
-                        if (s.isEmpty()) {
-                            exchange.sendResponseHeaders(400, 0);
-                            return;
-                        }
-                        String rawQuery = s.split("=")[1];
-                        if (rawQuery.isEmpty()) {
-                            exchange.sendResponseHeaders(400, 0);
-                            return;
-                        }
-                        int raw = Integer.parseInt(rawQuery);
-                        Task task = Objects.requireNonNull(taskManager).findTaskById(raw).get();
-
-                        String text = gson.toJson(task);
-                        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-                        exchange.getResponseHeaders().add("Content-Type", "application/json");
-                        exchange.sendResponseHeaders(200, resp.length);
-                        exchange.getResponseBody().write(resp);
-                        break;
-                    default:
-                        exchange.sendResponseHeaders(405, 0);
-                }
+                processRequestOnSearchTaskById(exchange);
             } catch (NullPointerException | NoSuchElementException e) {
                 exchange.sendResponseHeaders(400, 0);
             } finally {
@@ -329,23 +98,276 @@ public class HttpTaskServer {
         });
         server.createContext("/tasks/history", exchange -> {
             try {
-                switch (exchange.getRequestMethod()) {
-                    case "GET":
-                        List<Long> list = taskManager.getHistoryManager().stream()
-                                .map(Task::getId).collect(Collectors.toList());
-                        String text = gson.toJson(list);
-                        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-                        exchange.getResponseHeaders().add("Content-Type", "application/json");
-                        exchange.sendResponseHeaders(200, resp.length);
-                        exchange.getResponseBody().write(resp);
-                        break;
-                    default:
-                        exchange.sendResponseHeaders(405, 0);
-                }
+                processRequestOnOutputHistory(exchange);
             } finally {
                 exchange.close();
             }
         });
+    }
+
+    private void processDifferentHttpMethodsTasks(HttpExchange exchange) throws IOException {
+        switch (exchange.getRequestMethod()) {
+            case "POST":
+                String resultPost = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                if (resultPost.isEmpty()) {
+                    exchange.sendResponseHeaders(400, 0);
+                }
+                JsonElement jsonElementPost = JsonParser.parseString(resultPost);
+                JsonObject objectPost = jsonElementPost.getAsJsonObject();
+                String title = objectPost.get(TITLE).getAsString();
+                String description = objectPost.get(DESCRIPTION).getAsString();
+                int id = objectPost.get(ID).getAsInt();
+                int startTime = objectPost.get(DURATION).getAsInt();
+                LocalDateTime localDateTime = LocalDateTime
+                        .parse(objectPost.get(START_TIME).getAsString(), formatter);
+                Objects.requireNonNull(taskManager)
+                        .addTaskOrEpic(new Task(title, description, id, startTime, localDateTime));
+
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            case "PUT":
+                String resultHttpPut = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                if (resultHttpPut.isEmpty()) {
+                    exchange.sendResponseHeaders(403, 0);
+                }
+                JsonElement jsonElementHttpPut = JsonParser.parseString(resultHttpPut);
+                JsonObject objectHttpPut = jsonElementHttpPut.getAsJsonObject();
+                int idSearch = objectHttpPut.get(ID).getAsInt();
+                Task updateTask = Objects.requireNonNull(taskManager).findTaskById(idSearch).get();
+                updateTask.setTitle(objectHttpPut.get(TITLE).getAsString());
+                updateTask.setDescription(objectHttpPut.get(DESCRIPTION).getAsString());
+                updateTask.setStatus(Status.valueOf(objectHttpPut.get(STATUS).getAsString().toUpperCase()));
+                updateTask.setDuration(objectHttpPut.get(DURATION).getAsInt());
+                updateTask.setStartTime(LocalDateTime.parse(objectHttpPut.get(START_TIME).getAsString(), formatter));
+
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            case "DELETE":
+                String rawQuery = exchange.getRequestURI().getRawQuery().split("=")[1];
+                if (rawQuery.isEmpty()) {
+                    exchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                int idRemoveTask = Integer.parseInt(rawQuery);
+                taskManager.removeTaskOrEpic(idRemoveTask);
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            case "GET":
+                List<Task> listTasks = Objects.requireNonNull(taskManager).getAllTask();
+
+                String textResponse = gson.toJson(listTasks);
+                byte[] resp = textResponse.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, resp.length);
+                exchange.getResponseBody().write(resp);
+                break;
+            default:
+                exchange.sendResponseHeaders(405, 0);
+        }
+    }
+
+    private void processDifferentHttpMethodsEpic(HttpExchange exchange) throws IOException {
+        switch (exchange.getRequestMethod()) {
+            case "POST":
+                String resultHttpPost = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                if (resultHttpPost.isEmpty()) {
+                    exchange.sendResponseHeaders(403, 0);
+                }
+                JsonElement jsonElementHttpPost = JsonParser.parseString(resultHttpPost);
+                JsonObject objectHttpPost = jsonElementHttpPost.getAsJsonObject();
+                String title = objectHttpPost.get(TITLE).getAsString();
+                String descriptrion = objectHttpPost.get(DESCRIPTION).getAsString();
+                int id = objectHttpPost.get(ID).getAsInt();
+                Objects.requireNonNull(taskManager).addTaskOrEpic(new Epic(title, descriptrion, id));
+
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            case "PUT":
+                String resultHttpPut = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                if (resultHttpPut.isEmpty()) {
+                    exchange.sendResponseHeaders(403, 0);
+                }
+                JsonElement jsonElementHttpPut = JsonParser.parseString(resultHttpPut);
+                JsonObject objectHttpPut = jsonElementHttpPut.getAsJsonObject();
+                int idSearch = objectHttpPut.get(ID).getAsInt();
+                Epic updateTask = (Epic) Objects.requireNonNull(taskManager).findTaskById(idSearch).get();
+                updateTask.setTitle(objectHttpPut.get(TITLE).getAsString());
+                updateTask.setDescription(objectHttpPut.get(DESCRIPTION).getAsString());
+
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            case "DELETE":
+                String rawQuery = exchange.getRequestURI().getRawQuery().split("=")[1];
+                if (rawQuery.isEmpty()) {
+                    exchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                int idRemoveTask = Integer.parseInt(rawQuery);
+                Objects.requireNonNull(taskManager).removeTaskOrEpic(idRemoveTask);
+
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            case "GET":
+                List<Task> listEpic = Objects.requireNonNull(taskManager).getAllEpic();
+
+                String textResponse = gson.toJson(listEpic);
+                byte[] resp = textResponse.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, resp.length);
+                exchange.getResponseBody().write(resp);
+                break;
+            default:
+                exchange.sendResponseHeaders(405, 0);
+        }
+    }
+
+    private void processDifferentHttpMethodsSubtask(HttpExchange exchange) throws IOException {
+        switch (exchange.getRequestMethod()) {
+            case "POST":
+                String resultHttpPost = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                if (resultHttpPost.isEmpty()) {
+                    exchange.sendResponseHeaders(403, 0);
+                }
+                JsonElement jsonElementHttpPost = JsonParser.parseString(resultHttpPost);
+                JsonObject objectHttpPost = jsonElementHttpPost.getAsJsonObject();
+                String title = objectHttpPost.get(TITLE).getAsString();
+                String description = objectHttpPost.get(DESCRIPTION).getAsString();
+                int id = objectHttpPost.get(ID).getAsInt();
+                int idEpic = objectHttpPost.get(ID_EPIC).getAsInt();
+                int duration = objectHttpPost.get(DURATION).getAsInt();
+                LocalDateTime localDateTime = LocalDateTime
+                        .parse(objectHttpPost.get(START_TIME).getAsString(), formatter);
+                Objects.requireNonNull(taskManager).addSubTask
+                        (new SubTask(title, description, idEpic, id, duration, localDateTime));
+
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            case "PUT":
+                String resultHttpPut = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                if (resultHttpPut.isEmpty()) {
+                    exchange.sendResponseHeaders(403, 0);
+                }
+                JsonElement jsonElementHttpPut = JsonParser.parseString(resultHttpPut);
+                JsonObject objectHttpPut = jsonElementHttpPut.getAsJsonObject();
+                int idSearch = objectHttpPut.get(ID).getAsInt();
+                SubTask task = (SubTask) Objects.requireNonNull(taskManager).findTaskById(idSearch).get();
+                task.setTitle(objectHttpPut.get(TITLE).getAsString());
+                task.setDescription(objectHttpPut.get(DESCRIPTION).getAsString());
+                task.setStatus(Status.valueOf(objectHttpPut.get(STATUS).getAsString().toUpperCase()));
+                task.setDuration(objectHttpPut.get(DURATION).getAsInt());
+                task.setStartTime(LocalDateTime.parse(objectHttpPut.get(START_TIME).getAsString(), formatter));
+
+                Epic epic = (Epic) taskManager.findTaskById(task.getIdEpic()).get();
+                taskManager.setStatusProgressEpic(epic);
+                taskManager.setStatusNewEpic(epic);
+                taskManager.setStatusProgressEpic(epic);
+
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            case "DELETE":
+                String rawQuery = exchange.getRequestURI().getRawQuery().split("=")[1];
+                if (rawQuery.isEmpty()) {
+                    exchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                int idRemoveSubtask = Integer.parseInt(rawQuery);
+                Objects.requireNonNull(taskManager).removeSubtask(idRemoveSubtask);
+
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            default:
+                exchange.sendResponseHeaders(405, 0);
+        }
+    }
+
+    private void processRequestForGetSubtasksOfEpic(HttpExchange exchange) throws IOException {
+        switch (exchange.getRequestMethod()) {
+            case "GET":
+                String rawQuery = exchange.getRequestURI().getRawQuery().split("=")[1];
+                if (rawQuery.isEmpty()) {
+                    exchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                int idSearch = Integer.parseInt(rawQuery);
+                List<SubTask> subtasksOfEpic = Objects.requireNonNull(taskManager).getAllSubTaskOfEpic(idSearch);
+                if (subtasksOfEpic.isEmpty()) {
+                    throw new NullPointerException();
+                }
+                String textResponse = gson.toJson(subtasksOfEpic);
+                byte[] resp = textResponse.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, resp.length);
+                exchange.getResponseBody().write(resp);
+                break;
+            default:
+                exchange.sendResponseHeaders(405, 0);
+        }
+    }
+
+    private void processRequestOnOutputOrRemoveAllTypeTasks(HttpExchange exchange) throws IOException {
+        switch (exchange.getRequestMethod()) {
+            case "GET":
+                Set<Task> prioritizedTasks = Objects.requireNonNull(taskManager).getPrioritizedTasks();
+                List<Task> list1 = prioritizedTasks.stream().filter(SubTask.class::isInstance)
+                        .collect(Collectors.toList());
+                list1.forEach(prioritizedTasks::remove);
+
+                String textResponse = gson.toJson(prioritizedTasks);
+                byte[] resp = textResponse.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, resp.length);
+                exchange.getResponseBody().write(resp);
+                break;
+            case "DELETE":
+                taskManager.removeAllTypeTask();
+                exchange.sendResponseHeaders(200, 0);
+                break;
+            default:
+                exchange.sendResponseHeaders(405, 0);
+        }
+    }
+
+    private void processRequestOnSearchTaskById(HttpExchange exchange) throws IOException {
+        switch (exchange.getRequestMethod()) {
+            case "GET":
+                String rawQuery = exchange.getRequestURI().getRawQuery();
+                if (rawQuery.isEmpty()) {
+                    exchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                String parameter = rawQuery.split("=")[1];
+                if (parameter.isEmpty()) {
+                    exchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                int idSearch = Integer.parseInt(parameter);
+                Task task = Objects.requireNonNull(taskManager).findTaskById(idSearch).get();
+
+                String textResponse = gson.toJson(task);
+                byte[] resp = textResponse.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, resp.length);
+                exchange.getResponseBody().write(resp);
+                break;
+            default:
+                exchange.sendResponseHeaders(405, 0);
+        }
+    }
+
+    private void processRequestOnOutputHistory(HttpExchange exchange) throws IOException {
+        switch (exchange.getRequestMethod()) {
+            case "GET":
+                List<Long> listHistory = taskManager.getHistoryManager().stream()
+                        .map(Task::getId).collect(Collectors.toList());
+                String textResponse = gson.toJson(listHistory);
+                byte[] resp = textResponse.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, resp.length);
+                exchange.getResponseBody().write(resp);
+                break;
+            default:
+                exchange.sendResponseHeaders(405, 0);
+        }
     }
 
     public void start() {
@@ -356,6 +378,5 @@ public class HttpTaskServer {
 
     public void stop() {
         server.stop(0);
-        taskManager.stop();
     }
 }

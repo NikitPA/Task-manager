@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.HttpTaskServer;
+import server.KVServer;
 import tasks.Epic;
 import tasks.Status;
 import tasks.SubTask;
@@ -26,6 +27,7 @@ public class HttpTaskServerTest {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     HttpTaskServer server;
+    KVServer kvServer;
     Task task;
     Epic epic;
     SubTask subTask;
@@ -33,6 +35,8 @@ public class HttpTaskServerTest {
 
     @BeforeEach
     void beforeEach() throws IOException {
+        kvServer = new KVServer();
+        kvServer.start();
         server = new HttpTaskServer();
         server.start();
         gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class,
@@ -51,10 +55,9 @@ public class HttpTaskServerTest {
     @AfterEach
     void afterEach() {
         server.stop();
-
+        kvServer.stop();
     }
 
-    //ДОБАВЛЕНИЕ ЗАДАЧИ(1)
     @Test
     void checkAddTaskByHttpShouldInHttpManager() throws IOException, InterruptedException {
         HttpResponse<String> response = addTaskByHttp();
@@ -92,7 +95,6 @@ public class HttpTaskServerTest {
         assertEquals(Collections.EMPTY_LIST, server.taskManager.getAllTask());
     }
 
-    //Изменение задачи(2)
     @Test
     void checkUpdateTaskByHttpShouldInHttpManager() throws IOException, InterruptedException {
         addTaskByHttp();
@@ -147,7 +149,6 @@ public class HttpTaskServerTest {
         assertEquals(List.of(task), server.taskManager.getAllTask());
     }
 
-    //Удаление задачи(3)
     @Test
     void checkRemoveTaskWithExistentIdShouldDelete() throws IOException, InterruptedException {
         addTaskByHttp();
@@ -170,7 +171,6 @@ public class HttpTaskServerTest {
         assertEquals(List.of(task), server.taskManager.getAllTask());
     }
 
-    //Получение задач(4)
     @Test
     void checkGetAllTaskByHttpShould() throws IOException, InterruptedException {
         addTaskByHttp();
@@ -183,7 +183,6 @@ public class HttpTaskServerTest {
         assertNotEquals(Collections.EMPTY_LIST, server.taskManager.getAllTask());
     }
 
-    //Добавление эпика(5)
     @Test
     void checkAddEpicByHttpShouldInHttpManager() throws IOException, InterruptedException {
         HttpResponse<String> response = addEpicByHttp();
@@ -220,7 +219,6 @@ public class HttpTaskServerTest {
         assertEquals(Collections.EMPTY_LIST, server.taskManager.getAllEpic());
     }
 
-    //Изменение эпика(6)
     @Test
     void checkUpdateEpicByHttpShouldInHttpManager() throws IOException, InterruptedException {
         addEpicByHttp();
@@ -268,7 +266,6 @@ public class HttpTaskServerTest {
         assertEquals(List.of(epic), server.taskManager.getAllEpic());
     }
 
-    //Удаление эпика(7)
     @Test
     void checkRemoveEpicWithExistentIdShouldDelete() throws IOException, InterruptedException {
         addEpicByHttp();
@@ -291,7 +288,6 @@ public class HttpTaskServerTest {
         assertEquals(List.of(epic), server.taskManager.getAllEpic());
     }
 
-    //Получение эпиков(8)
     @Test
     void checkGetAllEpicByHttpShould() throws IOException, InterruptedException {
         addEpicByHttp();
@@ -304,7 +300,6 @@ public class HttpTaskServerTest {
         assertNotEquals(Collections.EMPTY_LIST, server.taskManager.getAllEpic());
     }
 
-    //Создание сабтасков(9)
     @Test
     void checkAddsubtaskByHttpShouldInHttpManager() throws IOException, InterruptedException {
         HttpResponse<String> response = addSubtaskByHttp();
@@ -342,7 +337,6 @@ public class HttpTaskServerTest {
         assertEquals(Collections.EMPTY_LIST, server.taskManager.getAllTask());
     }
 
-    //Изменение сабтасков(10)
     @Test
     void checkUpdateSubtaskByHttpShouldInHttpManager() throws IOException, InterruptedException {
         addSubtaskByHttp();
@@ -399,7 +393,6 @@ public class HttpTaskServerTest {
         assertTrue(server.taskManager.getAllSubTaskOfEpic(subTask.getIdEpic()).contains(subTask));
     }
 
-    //Удаление сабтаски(11)
     @Test
     void checkRemoveSubtaskWithExistentIdShouldDelete() throws IOException, InterruptedException {
         addSubtaskByHttp();
@@ -422,7 +415,6 @@ public class HttpTaskServerTest {
         assertTrue(server.taskManager.getAllSubTaskOfEpic(subTask.getIdEpic()).contains(subTask));
     }
 
-    //Вывод сабтасков эпика(12)
     @Test
     void checkGetSubtaskOfEpicById() throws IOException, InterruptedException {
         addSubtaskByHttp();
@@ -454,7 +446,6 @@ public class HttpTaskServerTest {
         assertEquals(response.statusCode(), 400);
     }
 
-    //Получение всех типов задач(13)
     @Test
     void checkGetAllTypeTasks() throws IOException, InterruptedException {
         addTaskByHttp();
@@ -468,7 +459,6 @@ public class HttpTaskServerTest {
         assertIterableEquals(List.of(task, epic, subTask), server.taskManager.getPrioritizedTasks());
     }
 
-    //Удаление всего(14)
     @Test
     void checkRemoveAllTypeTasks() throws IOException, InterruptedException {
         addTaskByHttp();
@@ -480,7 +470,7 @@ public class HttpTaskServerTest {
         assertEquals(response.statusCode(), 200);
         assertIterableEquals(Collections.emptyList(), server.taskManager.getPrioritizedTasks());
     }
-    //вывод задачи по айди
+
     @Test
     void checkGetTasksById() throws IOException, InterruptedException {
         addTaskByHttp();

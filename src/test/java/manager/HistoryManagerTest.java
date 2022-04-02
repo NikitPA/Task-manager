@@ -18,7 +18,7 @@ public class HistoryManagerTest {
 
     @Test
     public void historyManagerShouldDuplicateTasks() {
-        TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = new InMemoryTasksManager();
         Task task = new Task("", "", 1, 20, LocalDateTime.MIN);
         taskManager.addTaskOrEpic(task);
         taskManager.getTaskById(task.getId());
