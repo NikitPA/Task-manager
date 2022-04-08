@@ -29,3 +29,11 @@ a
 1src/main/java/manager/InMemoryHistoryManager.java,1/8/1819881782c0ff4a6ee87b234bbb867f12b082e9
 a
 1src/main/java/manager/FileBackedTasksManager.java,a/3/a3186c7206153dc9897d6ae16a1d88e6b9dbd266
+`
+0src/test/java/HttpServer/HttpTaskServerTest.java,0/d/0d7022a356e229324af2f229ddb68593a23b30f4
+]
+-src/test/java/manager/HistoryManagerTest.java,4/5/45e177dfd1c8b0daf7b89f2c638a2091b83e8d28
+V
+&src/main/java/server/KVTaskClient.java,a/d/ad8b0d2ae395f64eeedea8c8889f43861e62dbbf
+R
+"src/main/java/server/KVServer.java,c/6/c63fd115b6d3588f07e13f6d119a5161d5e04dc7

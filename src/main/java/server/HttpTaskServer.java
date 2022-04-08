@@ -34,7 +34,6 @@ public class HttpTaskServer {
     static final String START_TIME = "startTime";
     static final String STATUS = "status";
     static final String ID_EPIC = "idEpic";
-    //Решил так разделить конструктор по методам. Если есть совет как лучше разделить, с удовольствием прочту)
 
     public HttpTaskServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
